@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Numerical Methods Toolkit</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h2 {
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .hero {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #00c6ff, #0072ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            max-width: 600px;
+            opacity: 0.85;
+            margin-bottom: 50px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            width: 90%;
+            max-width: 1100px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            transition: all 0.4s ease;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .card h3 {
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .card p {
+            font-size: 0.95rem;
+            opacity: 0.8;
+            margin-bottom: 25px;
+        }
+
+        .card a {
+            text-decoration: none;
+            color: white;
+            background: linear-gradient(90deg, #00c6ff, #0072ff);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            transition: 0.3s;
+        }
+
+        .card a:hover {
+            opacity: 0.8;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.85rem;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h2>Mathexia</h2>
+</header>
+
+<section class="hero">
+    <h1>Numerical Methods Hub</h1>
+    <p>
+        Explore powerful numerical techniques including Gauss Elimination, Euler’s Rule, and Simpson’s 1/3 Rule — designed for students and engineers.
+    </p>
+
+    <div class="cards">
+
+        <div class="card">
+            <h3>Gauss Elimination</h3>
+            <p>Solve systems of linear equations efficiently using the Gauss elimination method.</p>
+            <a href="gauss_elimination.html">Open Calculator</a>
+        </div>
+
+        <div class="card">
+            <h3>Euler's Rule</h3>
+            <p>Approximate solutions of differential equations using Euler’s rule.</p>
+            <a href="euler.html">Open Calculator</a>
+        </div>
+
+        <div class="card">
+            <h3>simpson's Rule</h3>
+            <p>Approximate definite integrals using Simpson’s 1/3 rule.</p>
+            <a href="simpson.html">Open Calculator</a>
+        </div>
+
+    </div>
+</section>
+
+<footer>
+    © 2026 Numerical Methods Hub| Designed with precision
+</footer>
+
+</body>
+</html>

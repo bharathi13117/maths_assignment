@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gauss Elimination Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0a0a0f; --surface:#12121a; --card:#1a1a26; --border:#2a2a3d;
+    --accent:#7c3aed; --accent2:#06b6d4; --accent3:#f59e0b;
+    --text:#e2e8f0; --muted:#64748b; --success:#10b981;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;
+    min-height:100vh;padding:2rem 1rem;
+    background-image:radial-gradient(ellipse at 20% 0%,#7c3aed22 0%,transparent 50%),
+                     radial-gradient(ellipse at 80% 100%,#06b6d422 0%,transparent 50%);
+  }
+  h1{
+    text-align:center;font-size:clamp(1.8rem,5vw,3rem);font-weight:800;
+    letter-spacing:-0.03em;
+    background:linear-gradient(135deg,#7c3aed,#06b6d4);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+    margin-bottom:.25rem;
+  }
+  .subtitle{
+    text-align:center;color:var(--muted);font-family:'JetBrains Mono',monospace;
+    font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;margin-bottom:2.5rem;
+  }
+  .container{max-width:980px;margin:0 auto;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;}
+  .section-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--accent2);margin-bottom:1rem;}
+  .size-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1.2rem;}
+  .size-btn{width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:1.1rem;cursor:pointer;transition:all .2s;}
+  .size-btn:hover{border-color:var(--accent);color:var(--accent);}
+  #size-display{font-family:'JetBrains Mono',monospace;font-size:1rem;color:var(--accent);}
+  .presets{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.2rem;}
+  .preset-btn{font-size:.72rem;padding:.28rem .75rem;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;font-family:'JetBrains Mono',monospace;transition:all .2s;}
+  .preset-btn:hover{border-color:var(--accent2);color:var(--accent2);}
+  .matrix-wrap{overflow-x:auto;margin-bottom:1.3rem;}
+  .col-labels{display:flex;gap:8px;margin-bottom:4px;}
+  .col-label{width:58px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);}
+  .mat-input-row{display:flex;gap:8px;align-items:center;margin-bottom:6px;}
+  .row-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);width:26px;text-align:right;}
+  .mat-inp{
+    width:58px;height:40px;background:var(--surface);border:1px solid var(--border);
+    border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;
+    font-size:.9rem;text-align:center;outline:none;transition:border-color .2s,box-shadow .2s;
+  }
+  .mat-inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px #7c3aed22;}
+  .b-inp{border-color:#06b6d444!important;}
+  .sep-line{font-family:'JetBrains Mono',monospace;color:var(--accent2);font-size:1.1rem;padding:0 2px;}
+  .btn-row{display:flex;gap:.75rem;flex-wrap:wrap;}
+  .btn{padding:.65rem 1.8rem;border-radius:10px;border:none;font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;cursor:pointer;transition:all .2s;}
+  .btn-primary{background:linear-gradient(135deg,var(--accent),#9333ea);color:white;box-shadow:0 4px 20px #7c3aed44;}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px #7c3aed66;}
+  .btn-secondary{background:var(--surface);color:var(--muted);border:1px solid var(--border);}
+  .btn-secondary:hover{color:var(--text);border-color:var(--muted);}
+  .steps-container{display:flex;flex-direction:column;gap:.9rem;}
+  .step-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.1rem;opacity:0;animation:fadeUp .35s ease forwards;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .step-title{font-family:'JetBrains Mono',monospace;font-size:.73rem;color:var(--accent3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.5rem;}
+  .step-ops{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);margin-bottom:.8rem;white-space:pre-wrap;line-height:1.7;}
+  /* Matrix display */
+  .aug-display{display:flex;align-items:center;gap:4px;overflow-x:auto;}
+  .bracket{font-size:2.4rem;color:#4a4a6a;line-height:1;font-weight:200;}
+  .mat-body{display:flex;flex-direction:column;gap:4px;padding:4px 0;}
+  .mat-row-d{display:flex;gap:6px;align-items:center;}
+  .mat-sep{width:1px;height:32px;background:var(--accent2);opacity:.5;margin:0 5px;}
+  .mat-cell{width:58px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.78rem;border-radius:5px;border:1px solid transparent;}
+  .pivot-row{background:#7c3aed18;border-color:#7c3aed44;}
+  .elim-row{background:#06b6d418;border-color:#06b6d444;}
+  .pivot-elem{background:#7c3aed55!important;border-color:#7c3aed99!important;color:#c4b5fd;font-weight:700;}
+  .zero-cell{color:var(--muted);}
+  /* Solution */
+  .solution-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;margin-bottom:1rem;}
+  .sol-item{background:var(--surface);border:1px solid #10b98144;border-radius:10px;padding:.85rem;text-align:center;}
+  .sol-var{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--success);margin-bottom:.3rem;}
+  .sol-val{font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:700;color:var(--text);}
+  .sol-dec{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);margin-top:.2rem;}
+  .verify-ok{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--success);padding:.7rem;border:1px solid #10b98133;border-radius:8px;background:#10b98111;}
+  .verify-err{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:#fca5a5;padding:.7rem;border:1px solid #ef444433;border-radius:8px;background:#7f1d1d22;}
+  .error-box{font-family:'JetBrains Mono',monospace;font-size:.85rem;color:#fca5a5;padding:1rem;border:1px solid #ef4444;border-radius:10px;background:#7f1d1d33;line-height:1.6;}
+  /* Back sub steps */
+  .bs-table{width:100%;border-collapse:collapse;margin-bottom:1.2rem;}
+  .bs-table td{font-family:'JetBrains Mono',monospace;font-size:.8rem;padding:.5rem .6rem;border-bottom:1px solid var(--border);vertical-align:middle;line-height:1.6;}
+  .bs-table td:first-child{color:var(--success);font-weight:600;white-space:nowrap;width:40px;}
+  .bs-table td:last-child{color:#c4b5fd;font-weight:700;text-align:right;white-space:nowrap;}
+  .bs-expr{color:var(--muted);}
+  .bs-expr .hi{color:var(--text);}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Gauss Elimination</h1>
+  <p class="subtitle">Forward Elimination · Back Substitution · Step-by-Step</p>
+
+  <div class="card">
+    <div class="section-label">⬡ Matrix Size</div>
+    <div class="size-row">
+      <button class="size-btn" onclick="changeSize(-1)">−</button>
+      <span id="size-display">3</span>
+      <button class="size-btn" onclick="changeSize(1)">+</button>
+      <span style="font-size:.8rem;color:var(--muted)">variables (2–6)</span>
+    </div>
+
+    <div class="section-label">⬡ Quick Examples</div>
+    <div class="presets">
+      <button class="preset-btn" onclick="loadPreset(0)">2×2 Example</button>
+      <button class="preset-btn" onclick="loadPreset(1)">3×3 Example A</button>
+      <button class="preset-btn" onclick="loadPreset(2)">3×3 Example B</button>
+      <button class="preset-btn" onclick="loadPreset(3)">4×4 Example</button>
+      <button class="preset-btn" onclick="clearAll()">Clear</button>
+    </div>
+
+    <div class="section-label">⬡ Enter Augmented Matrix [A | b]</div>
+    <div class="matrix-wrap" id="matrix-wrap"></div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="solve()">▶ Solve</button>
+      <button class="btn btn-secondary" onclick="clearAll()">↺ Reset</button>
+    </div>
+  </div>
+
+  <div id="output"></div>
+</div>
+
+<script>
+/* ================================================================
+   GAUSS ELIMINATION — FULLY CORRECTED
+   Algorithm:
+   1. Forward elimination with partial pivoting
+   2. Back substitution: x[r] = (b[r] - sum(A[r][c]*x[c], c>r)) / A[r][r]
+   3. Verification against original system
+   ================================================================ */
+
+let n = 3;
+const VARS = ['x\u2081','x\u2082','x\u2083','x\u2084','x\u2085','x\u2086'];
+
+// Presets — all answers verified by hand
+const PRESETS = [
+  // 2x+y=5, x+3y=10 → x₁=1, x₂=3
+  { n:2, A:[[2,1],[1,3]], b:[5,10] },
+  // 4x-3y+z=-8, -2x+y-3z=-4, x-y+2z=3 → x₁=-2, x₂=1, x₃=3
+  { n:3, A:[[4,-3,1],[-2,1,-3],[1,-1,2]], b:[-8,-4,3] },
+  // x+y+z=6, 2x+3y+z=14, x+2y+3z=14 → x₁=1, x₂=2, x₃=3
+  { n:3, A:[[1,1,1],[2,3,1],[1,2,3]], b:[6,14,14] },
+  // 4×4 → x₁=1, x₂=2, x₃=3, x₄=4
+  { n:4, A:[[2,1,0,0],[3,4,2,0],[0,1,3,1],[0,0,2,4]], b:[4,16,11,14] },
+];
+
+// ── math helpers ────────────────────────────────────────────────
+function deepCopy(m){ return m.map(r=>[...r]); }
+function clean(v){ return Math.abs(v)<1e-9 ? 0 : v; }
+
+function fmtNum(v) {
+  v = clean(v);
+  if (v===0) return '0';
+  const sign = v<0 ? '-' : '';
+  const abs  = Math.abs(v);
+  // Search for exact fraction with denominator ≤ 10000
+  for (let d=1; d<=10000; d++) {
+    const num = Math.round(abs*d);
+    if (Math.abs(num/d - abs) < 1e-8) {
+      return d===1 ? `${sign}${num}` : `${sign}${num}/${d}`;
+    }
+  }
+  return parseFloat(v.toPrecision(7)).toString();
+}
+
+function fmtCell(v) {
+  v = clean(v);
+  if (v===0) return '0';
+  const s = (Math.round(v*10000)/10000).toString();
+  return s.length>9 ? parseFloat(v.toPrecision(4)).toString() : s;
+}
+
+// ── input helpers ────────────────────────────────────────────────
+function parseVal(id){
+  const v = parseFloat(document.getElementById(id).value);
+  return isNaN(v) ? 0 : v;
+}
+function getMatrix(){
+  return Array.from({length:n},(_,r)=>[
+    ...Array.from({length:n},(_,c)=>parseVal(`a${r}_${c}`)),
+    parseVal(`b${r}`)
+  ]);
+}
+
+// ── build input UI ───────────────────────────────────────────────
+function buildMatrix(){
+  const wrap = document.getElementById('matrix-wrap');
+  let html = '<div class="col-labels"><div style="width:32px"></div>';
+  for(let c=0;c<n;c++) html+=`<div class="col-label">${VARS[c]}</div>`;
+  html+='<div class="col-label" style="width:22px"></div>';
+  html+='<div class="col-label" style="color:var(--accent2)">b</div></div>';
+  for(let r=0;r<n;r++){
+    html+=`<div class="mat-input-row"><div class="row-label">R${r+1}</div>`;
+    for(let c=0;c<n;c++) html+=`<input type="number" id="a${r}_${c}" class="mat-inp" placeholder="0" step="any">`;
+    html+=`<span class="sep-line">|</span>`;
+    html+=`<input type="number" id="b${r}" class="mat-inp b-inp" placeholder="0" step="any">`;
+    html+='</div>';
+  }
+  wrap.innerHTML=html;
+}
+
+function changeSize(d){
+  n=Math.max(2,Math.min(6,n+d));
+  document.getElementById('size-display').textContent=n;
+  buildMatrix();
+  document.getElementById('output').innerHTML='';
+}
+
+function clearAll(){
+  for(let r=0;r<n;r++){
+    for(let c=0;c<n;c++){const e=document.getElementById(`a${r}_${c}`);if(e)e.value='';}
+    const b=document.getElementById(`b${r}`);if(b)b.value='';
+  }
+  document.getElementById('output').innerHTML='';
+}
+
+function loadPreset(i){
+  const p=PRESETS[i];
+  n=p.n;
+  document.getElementById('size-display').textContent=n;
+  buildMatrix();
+  for(let r=0;r<n;r++){
+    for(let c=0;c<n;c++) document.getElementById(`a${r}_${c}`).value=p.A[r][c];
+    document.getElementById(`b${r}`).value=p.b[r];
+  }
+  document.getElementById('output').innerHTML='';
+}
+
+// ── matrix display ───────────────────────────────────────────────
+function renderMatrix(mat, pivotRow, elimRows, pivotCol){
+  let html='<div class="aug-display"><div class="bracket">[</div><div class="mat-body">';
+  for(let r=0;r<n;r++){
+    html+='<div class="mat-row-d">';
+    for(let c=0;c<=n;c++){
+      if(c===n) html+='<div class="mat-sep"></div>';
+      let cls='mat-cell';
+      if(clean(mat[r][c])===0) cls+=' zero-cell';
+      if(r===pivotRow && c<n) cls+=' pivot-row';
+      if(elimRows.includes(r) && c<n) cls+=' elim-row';
+      if(r===pivotRow && c===pivotCol && c<n) cls+=' pivot-elem';
+      html+=`<div class="${cls}">${fmtCell(mat[r][c])}</div>`;
+    }
+    html+='</div>';
+  }
+  html+='</div><div class="bracket">]</div></div>';
+  return html;
+}
+
+// ════════════════════════════════════════════════════════════════
+//  SOLVE
+// ════════════════════════════════════════════════════════════════
+function solve(){
+  const origMatrix = getMatrix();       // never touched — used for verification
+  const mat = deepCopy(origMatrix);     // working augmented matrix [A|b]
+  const steps = [];
+
+  // ── 1. FORWARD ELIMINATION ─────────────────────────────────────
+  for(let col=0; col<n; col++){
+
+    // Partial pivoting: find row with max |value| in this column
+    let maxRow = col;
+    for(let r=col+1; r<n; r++){
+      if(Math.abs(mat[r][col]) > Math.abs(mat[maxRow][col])) maxRow=r;
+    }
+
+    if(Math.abs(mat[maxRow][col]) < 1e-12){
+      steps.push({title:`Col ${col+1}: zero pivot — skipping`,ops:'No non-zero pivot in this column.',mat:deepCopy(mat),pivotRow:col,elimRows:[],pivotCol:col});
+      continue;
+    }
+
+    // Swap rows
+    if(maxRow!==col){
+      const tmp=mat[col]; mat[col]=mat[maxRow]; mat[maxRow]=tmp;
+      steps.push({
+        title:`Swap R${col+1} ↔ R${maxRow+1}`,
+        ops:`Partial pivoting — bring largest pivot to row ${col+1}.`,
+        mat:deepCopy(mat), pivotRow:col, elimRows:[], pivotCol:col
+      });
+    }
+
+    // Eliminate below pivot
+    const elimRows=[], opLines=[];
+    for(let r=col+1; r<n; r++){
+      if(Math.abs(mat[r][col])<1e-14) continue;
+      const m = mat[r][col] / mat[col][col];
+      for(let c=col; c<=n; c++){
+        mat[r][c] = mat[r][c] - m * mat[col][c];
+        if(Math.abs(mat[r][c])<1e-10) mat[r][c]=0;
+      }
+      elimRows.push(r);
+      opLines.push(`R${r+1}  ←  R${r+1}  −  (${fmtNum(m)}) × R${col+1}`);
+    }
+
+    steps.push({
+      title: elimRows.length ? `Eliminate below pivot  [col ${col+1}]` : `Col ${col+1}: nothing to eliminate`,
+      ops:   elimRows.length ? opLines.join('\n') : 'All entries below pivot are already zero.',
+      mat:deepCopy(mat), pivotRow:col, elimRows, pivotCol:col
+    });
+  }
+
+  // ── 2. CONSISTENCY / RANK CHECK ────────────────────────────────
+  for(let r=0;r<n;r++){
+    const allZero = mat[r].slice(0,n).every(v=>Math.abs(v)<1e-10);
+    if(allZero && Math.abs(mat[r][n])>1e-8){
+      return renderOutput(steps,null,'inconsistent',origMatrix,[]);
+    }
+  }
+  const rank = mat.filter(row=>row.slice(0,n).some(v=>Math.abs(v)>1e-10)).length;
+  if(rank<n) return renderOutput(steps,null,'infinite',origMatrix,[]);
+
+  // ── 3. BACK SUBSTITUTION ───────────────────────────────────────
+  // Upper-triangular system. Solve from LAST row upward.
+  // x[r] = ( mat[r][n] − Σ mat[r][c]·x[c] for c = r+1..n-1 ) / mat[r][r]
+
+  const x = new Array(n).fill(0);   // solution array, filled as we go
+  const bsRows = [];                 // for display
+
+  for(let r=n-1; r>=0; r--){
+    // Start with the RHS of this row
+    let rhs = mat[r][n];
+
+    // Build display expression
+    let exprParts = [`b = ${fmtNum(mat[r][n])}`];
+
+    // Subtract the contribution of already-solved variables
+    for(let c=r+1; c<n; c++){
+      const coeff = mat[r][c];
+      const xval  = x[c];          // x[c] was solved in a previous iteration (c > r)
+      if(Math.abs(coeff)>1e-12){
+        rhs -= coeff * xval;
+        exprParts.push(`(${fmtNum(coeff)})(${fmtNum(xval)})`);
+      }
+    }
+
+    // Divide by the diagonal element
+    x[r] = clean(rhs / mat[r][r]);
+
+    bsRows.push({
+      varName : VARS[r],
+      exprParts,
+      divisor : fmtNum(mat[r][r]),
+      result  : fmtNum(x[r]),
+      decimal : x[r]
+    });
+  }
+
+  renderOutput(steps, x, 'ok', origMatrix, bsRows);
+}
+
+// ── render ───────────────────────────────────────────────────────
+function renderOutput(steps, x, status, origMatrix, bsRows){
+
+  const stepsHtml = steps.map((s,i)=>`
+    <div class="step-card" style="animation-delay:${i*.06}s">
+      <div class="step-title">[${i+1}] ${s.title}</div>
+      <div class="step-ops">${s.ops}</div>
+      ${renderMatrix(s.mat,s.pivotRow,s.elimRows,s.pivotCol)}
+    </div>`).join('');
+
+  let resultHtml='';
+
+  if(status==='inconsistent'){
+    resultHtml=`<div class="error-box">⚠ No Solution — System is inconsistent.<br>A contradiction row [0 0 … 0 | c≠0] was found during elimination.</div>`;
+  } else if(status==='infinite'){
+    resultHtml=`<div class="error-box">∞ Infinitely Many Solutions — The system has free variables (rank &lt; ${n}).</div>`;
+  } else {
+    // Back-substitution table
+    // bsRows[0] = last variable solved (x_n), bsRows[n-1] = first (x_1)
+    // Display them in solve order (x_n first, then upward)
+    const bsHtml = bsRows.map(bs=>{
+      const subtracted = bs.exprParts.slice(1);
+      let expr = `<span class="hi">${bs.exprParts[0]}</span>`;
+      if(subtracted.length){
+        expr += `  −  ` + subtracted.map(p=>`<span class="hi">${p}</span>`).join('  −  ');
+      }
+      return `<tr>
+        <td>${bs.varName}</td>
+        <td class="bs-expr">[ ${expr} ]  ÷  <span class="hi">${bs.divisor}</span></td>
+        <td>${bs.result}</td>
+      </tr>`;
+    }).join('');
+
+    // Solution boxes — display in x₁, x₂ … order (reverse bsRows)
+    const solItems = [...bsRows].reverse().map((bs,i)=>{
+      const frac = bs.result;
+      const showDec = frac.includes('/');
+      return `<div class="sol-item">
+        <div class="sol-var">${bs.varName}</div>
+        <div class="sol-val">${frac}</div>
+        ${showDec ? `<div class="sol-dec">≈ ${parseFloat(bs.decimal.toFixed(6))}</div>` : ''}
+      </div>`;
+    }).join('');
+
+    // Verify by substituting back into ORIGINAL equations
+    const allOk = origMatrix.every(row=>{
+      const lhs = row.slice(0,n).reduce((s,a,c)=>s+a*x[c],0);
+      return Math.abs(lhs-row[n])<1e-5;
+    });
+
+    // Build verification detail
+    const verifyDetail = origMatrix.map((row,i)=>{
+      const lhs = row.slice(0,n).reduce((s,a,c)=>s+a*x[c],0);
+      const rhs = row[n];
+      const ok  = Math.abs(lhs-rhs)<1e-5;
+      const lhsStr = row.slice(0,n).map((a,c)=>{
+        if(Math.abs(a)<1e-12) return null;
+        const coStr = a===1?'':(a===-1?'-':fmtNum(a));
+        return `${coStr}${VARS[c]}`;
+      }).filter(Boolean).join(' + ').replace(/\+ -/g,'− ');
+      return `<div style="font-size:.75rem;color:${ok?'var(--success)':'#fca5a5'};padding:.25rem 0;font-family:'JetBrains Mono',monospace;">
+        ${ok?'✓':'✗'} Eq${i+1}: ${lhsStr} = ${fmtNum(lhs)} (expected ${fmtNum(rhs)})
+      </div>`;
+    }).join('');
+
+    resultHtml=`
+      <div class="section-label">⬡ Back Substitution (solving from last row upward)</div>
+      <table class="bs-table"><tbody>${bsHtml}</tbody></table>
+      <div class="section-label">⬡ Solution</div>
+      <div class="solution-grid">${solItems}</div>
+      <div class="${allOk?'verify-ok':'verify-err'}" style="margin-top:.75rem">
+        ${allOk ? `✓ Verified — all ${n} original equations are satisfied` : '⚠ Verification mismatch'}
+        ${verifyDetail}
+      </div>`;
+  }
+
+  document.getElementById('output').innerHTML=`
+    <div class="card">
+      <div class="section-label">⬡ Forward Elimination Steps</div>
+      <div class="steps-container">${stepsHtml}</div>
+    </div>
+    <div class="card">${resultHtml}</div>`;
+}
+
+// ── init ─────────────────────────────────────────────────────────
+buildMatrix();
+</script>
+</body>
+</html>

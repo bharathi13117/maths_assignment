@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Euler’s Method Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0a0a0f; --surface:#12121a; --card:#1a1a26; --border:#2a2a3d;
+    --accent:#7c3aed; --accent2:#06b6d4; --accent3:#f59e0b;
+    --text:#e2e8f0; --muted:#64748b; --success:#10b981;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;
+    min-height:100vh;padding:2rem 1rem;
+    background-image:radial-gradient(ellipse at 20% 0%,#7c3aed22 0%,transparent 50%),
+                     radial-gradient(ellipse at 80% 100%,#06b6d422 0%,transparent 50%);
+  }
+  h1{
+    text-align:center;font-size:clamp(1.8rem,5vw,3rem);font-weight:800;
+    letter-spacing:-0.03em;
+    background:linear-gradient(135deg,#7c3aed,#06b6d4);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+    margin-bottom:.25rem;
+  }
+  .subtitle{
+    text-align:center;color:var(--muted);font-family:'JetBrains Mono',monospace;
+    font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;margin-bottom:2.5rem;
+  }
+  .container{max-width:800px;margin:0 auto;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;}
+  .section-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--accent2);margin-bottom:1rem;}
+  
+  .input-group{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem;}
+  .input-row{display:flex;gap:1rem;flex-wrap:wrap;align-items:center;}
+  
+  label{font-size:.9rem;color:var(--muted);}
+  
+  input[type="text"], input[type="number"]{
+    background:var(--surface);border:1px solid var(--border);border-radius:8px;
+    color:var(--text);font-family:'JetBrains Mono',monospace;padding:.6rem;
+    font-size:1rem;outline:none;transition:border-color .2s;
+  }
+  input:focus{border-color:var(--accent);}
+  .fn-input{flex:1;min-width:200px;}
+  
+  .btn{padding:.65rem 1.8rem;border-radius:10px;border:none;font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;cursor:pointer;transition:all .2s;}
+  .btn-primary{background:linear-gradient(135deg,var(--accent),#9333ea);color:white;box-shadow:0 4px 20px #7c3aed44;}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px #7c3aed66;}
+  
+  /* Table Styles */
+  .calc-table{width:100%;border-collapse:collapse;margin-top:1rem;margin-bottom:1.5rem;font-family:'JetBrains Mono',monospace;font-size:.85rem;}
+  .calc-table th{text-align:left;color:var(--muted);padding:.5rem;border-bottom:1px solid var(--border);font-weight:400;}
+  .calc-table td{padding:.5rem;border-bottom:1px solid #2a2a3d44;}
+  .calc-table tr:last-child td{border-bottom:none;}
+  .coef-1{color:var(--muted);}
+  .coef-4{color:var(--success);font-weight:700;}
+  .coef-2{color:var(--accent3);font-weight:600;}
+  
+  .result-box{
+    background:var(--surface);border:1px solid var(--accent2);border-radius:12px;
+    padding:1.5rem;text-align:center;margin-top:1rem;
+  }
+  .result-val{font-size:2rem;font-weight:800;color:var(--text);font-family:'JetBrains Mono',monospace;}
+  .result-label{color:var(--accent2);font-family:'JetBrains Mono',monospace;font-size:.8rem;margin-bottom:.5rem;}
+
+  .error{color:#fca5a5;background:#7f1d1d33;padding:1rem;border-radius:8px;border:1px solid #ef4444;margin-top:1rem;font-family:'JetBrains Mono',monospace;font-size:.9rem;}
+
+  .math-hint{font-size:.75rem;color:var(--muted);margin-top:.25rem;}
+  
+  .step-box{background:var(--surface);border-left:3px solid var(--accent);padding:1rem;margin:.5rem 0;border-radius:0 8px 8px 0;}
+  .step-title{color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:.8rem;margin-bottom:.5rem;}
+  .formula{color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.85rem;}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Euler's Method</h1>
+  <p class="subtitle">Numerical Solution for ODEs</p>
+
+  <div class="card">
+    <div class="section-label"> Differential Equation</div>
+    
+    <div class="input-group">
+      <label>dy/dx = f(x, y)</label>
+      <input type="text" id="fn" class="fn-input" placeholder="e.g., x + y, -2*x*y, x^2 - y" value="x + y">
+      <div class="math-hint">Supported: sin, cos, tan, log, sqrt, exp, abs, pi, e. Use '^' for power. Use 'x' and 'y' as variables.</div>
+    </div>
+
+    <div class="input-row">
+      <div class="input-group" style="margin-bottom:0; flex:1;">
+        <label>Initial x (x₀)</label>
+        <input type="number" id="x0" value="0" step="any">
+      </div>
+      <div class="input-group" style="margin-bottom:0; flex:1;">
+        <label>Initial y (y₀)</label>
+        <input type="number" id="y0" value="1" step="any">
+      </div>
+    </div>
+
+    <div class="input-row" style="margin-top:1rem;">
+      <div class="input-group" style="margin-bottom:0; flex:1;">
+        <label>Step Size (h)</label>
+        <input type="number" id="h" value="0.1" step="any" min="0.0001">
+      </div>
+      <div class="input-group" style="margin-bottom:0; flex:1;">
+        <label>Target x</label>
+        <input type="number" id="targetX" value="0.5" step="any">
+      </div>
+    </div>
+
+    <div style="margin-top:1.5rem">
+      <button class="btn btn-primary" onclick="calculate()">Calculate Solution</button>
+    </div>
+  </div>
+
+  <div id="output"></div>
+</div>
+
+<script>
+function parseFn(str) {
+    let expr = str.replace(/\^/g, '**');
+    const funcs = ['sin','cos','tan','log','sqrt','exp','abs','ceil','floor','round','max','min','tan'];
+    funcs.forEach(f => {
+        expr = expr.replace(new RegExp('\\b' + f + '\\b','g'), 'Math.' + f);
+    });
+    expr = expr.replace(/\bpi\b/g, 'Math.PI');
+    expr = expr.replace(/\be\b/g, 'Math.E');
+    return new Function('x', 'y', `return ${expr};`);
+}
+
+function formatNumber(num) {
+    if (Math.abs(num) < 0.0001 || Math.abs(num) > 10000) {
+        return num.toExponential(6);
+    }
+    return parseFloat(num.toFixed(6)).toString();
+}
+
+function calculate() {
+    const out = document.getElementById('output');
+    out.innerHTML = '';
+    const fnStr = document.getElementById('fn').value.trim();
+    const x0 = parseFloat(document.getElementById('x0').value);
+    const y0 = parseFloat(document.getElementById('y0').value);
+    const h = parseFloat(document.getElementById('h').value);
+    const targetX = parseFloat(document.getElementById('targetX').value);
+
+    if (isNaN(x0) || isNaN(y0) || isNaN(h) || isNaN(targetX) || !fnStr) {
+        out.innerHTML = '<div class="error">Please provide valid inputs.</div>';
+        return;
+    }
+    
+    if (h <= 0) {
+        out.innerHTML = '<div class="error">Step size (h) must be positive.</div>';
+        return;
+    }
+
+    let f;
+    try {
+        f = parseFn(fnStr);
+        f(x0, y0);
+    } catch (e) {
+        out.innerHTML = '<div class="error">Unable to parse function. Use valid mathematical expressions with x and y.</div>';
+        return;
+    }
+
+    const steps = [];
+    let x = x0;
+    let y = y0;
+    let stepCount = 0;
+    const n = Math.ceil(Math.abs(targetX - x0) / h);
+    
+    // Formula box
+    let html = '';
+    html += `<div class="card"><div class="step-title">Euler's Method Formula</div><div class="formula">y<sub>n+1</sub> = y<sub>n</sub> + h · f(x<sub>n</sub>, y<sub>n</sub>)</div></div>`;
+    
+    html += `<table class="calc-table"><thead><tr><th>Step</th><th>x<sub>n</sub></th><th>y<sub>n</sub></th><th>f(x<sub>n</sub>, y<sub>n</sub>)</th><th>y<sub>n+1</sub></th></tr></thead><tbody>`;
+    
+    // Initial condition
+    const slope0 = f(x, y);
+    const yNext = y + h * slope0;
+    
+    html += `<tr><td>0</td><td>${formatNumber(x)}</td><td>${formatNumber(y)}</td><td>${formatNumber(slope0)}</td><td>${formatNumber(yNext)}</td></tr>`;
+    
+    steps.push({step: 0, x, y, slope: slope0, yNext});
+    
+    while ((targetX > x0 && x + h <= targetX + 0.0000001) || (targetX < x0 && x - h >= targetX - 0.0000001) || stepCount === 0) {
+        if (stepCount >= n + 1) break;
+        
+        x = x + h;
+        y = y + h * slope0;
+        const slope = f(x, y);
+        const nextY = y + h * slope;
+        
+        stepCount++;
+        steps.push({step: stepCount, x, y, slope, yNext: nextY});
+        
+        html += `<tr><td>${stepCount}</td><td>${formatNumber(x)}</td><td>${formatNumber(y)}</td><td>${formatNumber(slope)}</td><td>${formatNumber(nextY)}</td></tr>`;
+    }
+    
+    // Final result
+    const finalX = Math.abs(targetX - x0) < 0.0000001 ? x0 : x;
+    const finalY = y;
+    
+    html += `</tbody></table>`;
+    
+    html += `<div class="result-box">
+        <div class="result-label">Solution at x = ${formatNumber(targetX)}</div>
+        <div class="result-val">y ≈ ${formatNumber(finalY)}</div>
+    </div>`;
+    
+    html += `<div class="card" style="margin-top:1.5rem;">
+        <div class="step-title">Summary</div>
+        <div class="formula">
+            Starting point: (${formatNumber(x0)}, ${formatNumber(y0)})<br>
+            Step size: h = ${formatNumber(h)}<br>
+            Total steps: ${stepCount}<br>
+            Target x: ${formatNumber(targetX)}<br>
+            Approximate y: ${formatNumber(finalY)}
+        </div>
+    </div>`;
+    
+    out.innerHTML = html;
+}
+</script>
+</body>
+</html>
