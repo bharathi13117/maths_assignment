@@ -77,6 +77,9 @@
             backdrop-filter: blur(10px);
             transition: all 0.4s ease;
             border: 1px solid rgba(255,255,255,0.15);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         .card:hover {
@@ -94,8 +97,17 @@
             font-size: 0.95rem;
             opacity: 0.8;
             margin-bottom: 25px;
+            flex-grow: 1;
         }
 
+        /* Button Container Layout */
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* Main Link Button */
         .card a {
             text-decoration: none;
             color: white;
@@ -104,10 +116,102 @@
             border-radius: 25px;
             font-size: 0.9rem;
             transition: 0.3s;
+            flex-grow: 1;
+            display: inline-block;
         }
 
         .card a:hover {
             opacity: 0.8;
+        }
+
+        /* Help Button Style */
+        .help-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 0;
+        }
+
+        .help-btn:hover {
+            background: white;
+            color: #2c5364;
+            transform: scale(1.1);
+        }
+
+        /* --- Modal (Pop-up) Styles --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none; /* Hidden by default */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: #1e293b;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            border: 1px solid #00c6ff;
+            box-shadow: 0 0 20px rgba(0, 198, 255, 0.3);
+            text-align: left;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-content h3 {
+            margin-bottom: 15px;
+            color: #00c6ff;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 10px;
+        }
+
+        .modal-content ul {
+            margin-left: 20px;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            color: #e2e8f0;
+        }
+        
+        .modal-content code {
+            background: #0f172a;
+            padding: 2px 5px;
+            border-radius: 4px;
+            color: #38bdf8;
+            font-family: monospace;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #ff4d4d;
+            background: none;
+            border: none;
         }
 
         footer {
@@ -138,30 +242,130 @@
 
     <div class="cards">
 
+        <!-- Card 1: Gauss Elimination -->
         <div class="card">
             <h3>Gauss Elimination</h3>
             <p>Solve systems of linear equations efficiently using the Gauss elimination method.</p>
-            <a href="gauss_elimination.html">Open Calculator</a>
+            <div class="card-actions">
+                <a href="gauss_elimination.html">Open Calculator</a>
+                <!-- Help Button -->
+                <button class="help-btn" onclick="openHelp('gauss')">?</button>
+            </div>
         </div>
 
+        <!-- Card 2: Euler's Rule -->
         <div class="card">
             <h3>Euler's Rule</h3>
             <p>Approximate solutions of differential equations using Euler’s rule.</p>
-            <a href="euler.html">Open Calculator</a>
+            <div class="card-actions">
+                <a href="euler.html">Open Calculator</a>
+                <!-- Help Button -->
+                <button class="help-btn" onclick="openHelp('euler')">?</button>
+            </div>
         </div>
 
+        <!-- Card 3: Simpson's Rule -->
         <div class="card">
-            <h3>simpson's Rule</h3>
+            <h3>Simpson's Rule</h3>
             <p>Approximate definite integrals using Simpson’s 1/3 rule.</p>
-            <a href="simpson.html">Open Calculator</a>
+            <div class="card-actions">
+                <a href="simpson.html">Open Calculator</a>
+                <!-- Help Button -->
+                <button class="help-btn" onclick="openHelp('simpson')">?</button>
+            </div>
         </div>
 
     </div>
 </section>
 
 <footer>
-    © 2026 Numerical Methods Hub| Designed with precision
+    © 2026 Numerical Methods Hub | Designed with precision
 </footer>
+
+<!-- Modal Structure (Hidden by default) -->
+<div class="modal-overlay" id="helpModal">
+    <div class="modal-content">
+        <button class="close-btn" onclick="closeModal()">&times;</button>
+        <h3 id="modalTitle">Help Title</h3>
+        <div id="modalBody">
+            <!-- Dynamic Content will be injected here via JavaScript -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // Data for the help buttons
+    const helpData = {
+        gauss: {
+            title: "How to use Gauss Elimination",
+            content: `
+                <ul>
+                    <li><strong>Input Format:</strong> Enter the Augmented Matrix (Coefficients + Constant).</li>
+                    <li>Each row represents one equation.</li>
+                    <li>Separate numbers by a <strong>single space</strong>.</li>
+                    <li>Include the equal sign result at the end of the row.</li>
+                    <li><strong>Example:</strong><br>
+                    For equations: <br>
+                    1x + 1y = 5 <br>
+                    2x - 1y = 1 <br>
+                    Enter the rows as:<br>
+                    <code>1 1 5</code><br>
+                    <code>2 -1 1</code>
+                    </li>
+                </ul>
+            `
+        },
+        euler: {
+            title: "How to use Euler's Rule",
+            content: `
+                <ul>
+                    <li><strong>dY/dX Function:</strong> Enter the derivative function in terms of x and y (e.g., <code>x + y</code>).</li>
+                    <li><strong>Initial X (x0):</strong> The starting x value.</li>
+                    <li><strong>Initial Y (y0):</strong> The starting y value corresponding to x0.</li>
+                    <li><strong>Step Size (h):</strong> The step interval (e.g., 0.1).</li>
+                    <li><strong>Number of Steps:</strong> How many times to iterate.</li>
+                </ul>
+            `
+        },
+        simpson: {
+            title: "How to use Simpson's 1/3 Rule",
+            content: `
+                <ul>
+                    <li><strong>Function f(x):</strong> Enter the mathematical function to integrate (e.g., <code>x^2</code>, <code>sin(x)</code>, <code>e^x</code>).</li>
+                    <li><strong>Lower Bound (a):</strong> The start of the interval.</li>
+                    <li><strong>Upper Bound (b):</strong> The end of the interval.</li>
+                    <li><strong>Subintervals (n):</strong> Must be an <strong>even number</strong>.</li>
+                </ul>
+            `
+        }
+    };
+
+    // Function to open modal
+    function openHelp(type) {
+        const modal = document.getElementById('helpModal');
+        const title = document.getElementById('modalTitle');
+        const body = document.getElementById('modalBody');
+
+        if (helpData[type]) {
+            title.innerText = helpData[type].title;
+            body.innerHTML = helpData[type].content;
+            modal.style.display = "flex";
+        }
+    }
+
+    // Function to close modal
+    function closeModal() {
+        document.getElementById('helpModal').style.display = "none";
+    }
+
+    // Close modal if clicking outside the content box
+    window.onclick = function(event) {
+        const modal = document.getElementById('helpModal');
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
 
 </body>
 </html>
