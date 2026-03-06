@@ -164,7 +164,9 @@ function calculate() {
     const {result, rows, h} = simpson(a, b, n, f);
 
     let html = '';
-    html += `<div class="result-box"><div class="result-label">Approximate integral</div><div class="result-val">${result}</div></div>`;
+    // CHANGE MADE HERE: Added .toFixed(4) to round the result to 4 decimal places
+    html += `<div class="result-box"><div class="result-label">Approximate integral</div><div class="result-val">${result.toFixed(4)}</div></div>`;
+    
     html += `<table class="calc-table"><thead><tr><th>x</th><th>f(x)</th><th>coef</th></tr></thead><tbody>`;
     html += `<tr><td>${a}</td><td>${f(a)}</td><td class="coef-1">1</td></tr>`;
     for (const r of rows) {
